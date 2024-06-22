@@ -33,7 +33,7 @@ export function UserDialog({ user }: { user?: SelectUser }) {
             Make changes to the user here. Click save when you're done.
           </DialogDescription>
         </DialogHeader>
-        <form action={user ? updateUser.bind(null, user) : addUser}>
+        <form>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="name" className="text-right">
@@ -78,6 +78,7 @@ export function UserDialog({ user }: { user?: SelectUser }) {
               onClick={() => {
                 setOpen(false);
               }}
+              formAction={user ? updateUser.bind(null, user) : addUser}
             >
               Save changes
             </Button>
