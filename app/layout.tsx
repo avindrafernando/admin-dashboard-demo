@@ -2,7 +2,7 @@ import './globals.css';
 
 import Link from 'next/link';
 import { Analytics } from '@vercel/analytics/react';
-import { Logo, SettingsIcon, UsersIcon, VercelLogo } from '@/components/icons';
+import { Logo, SettingsIcon, UsersIcon } from '@/components/icons';
 import { User } from './user';
 import { NavItem } from './nav-item';
 
@@ -29,7 +29,7 @@ export default function RootLayout({
                   href="/"
                 >
                   <Logo />
-                  <span className="">ACME</span>
+                  <span className="">Lorem Picsum Corp</span>
                 </Link>
               </div>
               <div className="flex-1 overflow-auto py-2">
@@ -41,10 +41,6 @@ export default function RootLayout({
                   <NavItem href="/settings">
                     <SettingsIcon className="h-4 w-4" />
                     Settings
-                  </NavItem>
-                  <NavItem href="https://vercel.com/templates/next.js/admin-dashboard-tailwind-postgres-react-nextjs">
-                    <VercelLogo className="h-4 w-4" />
-                    Deploy
                   </NavItem>
                 </nav>
               </div>
