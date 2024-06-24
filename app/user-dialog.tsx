@@ -13,27 +13,39 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SelectUser } from '@/lib/db';
-import { addUser, updateUser } from './actions';
-import { Dispatch, SetStateAction, useState } from 'react';
-import { useFormStatus } from 'react-dom';
+import { addUser, FormState, updateUser } from './actions';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { useFormState, useFormStatus } from 'react-dom';
 import { ButtonSpinner } from '@/components/icons';
 
 function SubmitButton({
-  user,
-  setOpen
+  formAction,
+  setOpen,
+  state
 }: {
-  user?: SelectUser;
+  formAction: (formData: FormData) => void;
   setOpen: Dispatch<SetStateAction<boolean>>;
+  state: FormState;
 }) {
   const { pending } = useFormStatus();
+
+  // HACK to reset state after successful submission
+  useEffect(() => {
+    if (!pending && state.status === 'success') {
+      state.status = 'idle';
+      state.message = '';
+
+      setOpen(false);
+    }
+  }, [state, setOpen]);
 
   return (
     <Button
       type="submit"
-      onClick={() => {
-        if (!pending) setOpen(false);
-      }}
-      formAction={user ? updateUser.bind(null, user) : addUser}
+      formAction={formAction}
+      // onClick={() => {
+      //   if (!pending) setOpen(false);
+      // }}
       disabled={pending}
     >
       {pending && <ButtonSpinner />}
@@ -42,8 +54,17 @@ function SubmitButton({
   );
 }
 
+const initialState: FormState = {
+  message: '',
+  status: 'idle'
+};
+
 export function UserDialog({ user }: { user?: SelectUser }) {
   const [open, setOpen] = useState(false);
+  const [state, formAction] = useFormState(
+    user ? updateUser.bind(null, user) : addUser,
+    initialState
+  );
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -79,7 +100,7 @@ export function UserDialog({ user }: { user?: SelectUser }) {
               <Input
                 id="email"
                 name="email"
-                type="email"
+                //   type="email"
                 className="col-span-3"
                 defaultValue={user?.email ?? ''}
                 required
@@ -97,9 +118,30 @@ export function UserDialog({ user }: { user?: SelectUser }) {
                 defaultValue={user?.username ?? ''}
               />
             </div>
+            {state && state.status === 'error' && state.errors && (
+              <div
+                id="email-error"
+                aria-live="polite"
+                className="text-sm text-red-500 text-right grid items-center"
+              >
+                {state.errors?.name?.map((error: string) => (
+                  <p key={error}>{error}</p>
+                ))}
+                {state.errors?.email?.map((error: string) => (
+                  <p key={error}>{error}</p>
+                ))}
+                {state.errors?.username?.map((error: string) => (
+                  <p key={error}>{error}</p>
+                ))}
+              </div>
+            )}
           </div>
           <DialogFooter>
-            <SubmitButton user={user} setOpen={setOpen} />
+            <SubmitButton
+              formAction={formAction}
+              setOpen={setOpen}
+              state={state}
+            />
           </DialogFooter>
         </form>
       </DialogContent>
