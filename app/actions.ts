@@ -10,7 +10,12 @@ import {
 import { revalidatePath } from 'next/cache';
 
 export async function deleteUser(userId: string) {
-  await deleteUserById(userId);
+  try {
+    await deleteUserById(userId);
+  } catch (e) {
+    throw new Error('Failed to delete user');
+  }
+
   revalidatePath('/');
 }
 
@@ -22,7 +27,12 @@ export async function updateUser(user: SelectUser, formData: FormData) {
     username: String(formData.get('username')) ?? user.username
   };
 
-  await updateUserById(updatedUser);
+  try {
+    await updateUserById(updatedUser);
+  } catch (e) {
+    throw new Error('Failed to update user');
+  }
+
   revalidatePath('/');
 }
 
@@ -33,6 +43,10 @@ export async function addUser(formData: FormData) {
     username: String(formData.get('username')) ?? ''
   };
 
-  await createUser(newUser);
+  try {
+    await createUser(newUser);
+  } catch (e) {
+    throw new Error('Failed to add user');
+  }
   revalidatePath('/');
 }
