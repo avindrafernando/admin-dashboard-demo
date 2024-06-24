@@ -7,9 +7,11 @@ import {
   createUser,
   SelectUserWithoutId
 } from '@/lib/db';
+import { revalidatePath } from 'next/cache';
 
 export async function deleteUser(userId: string) {
   await deleteUserById(userId);
+  revalidatePath('/');
 }
 
 export async function updateUser(user: SelectUser, formData: FormData) {
@@ -21,6 +23,7 @@ export async function updateUser(user: SelectUser, formData: FormData) {
   };
 
   await updateUserById(updatedUser);
+  revalidatePath('/');
 }
 
 export async function addUser(formData: FormData) {
@@ -31,4 +34,5 @@ export async function addUser(formData: FormData) {
   };
 
   await createUser(newUser);
+  revalidatePath('/');
 }
