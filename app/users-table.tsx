@@ -13,6 +13,8 @@ import { SelectUser } from '@/lib/db';
 import { deleteUser } from './actions';
 import { useRouter } from 'next/navigation';
 import { UserDialog } from './user-dialog';
+import { useTransition } from 'react';
+import { ButtonSpinner } from '@/components/icons';
 
 export function UsersTable({
   users,
@@ -29,23 +31,21 @@ export function UsersTable({
 
   return (
     <>
-      <form className="border shadow-sm rounded-lg">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="max-w-[150px]">Name</TableHead>
-              <TableHead className="hidden md:table-cell">Email</TableHead>
-              <TableHead className="hidden md:table-cell">Username</TableHead>
-              <TableHead></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {users.map((user) => (
-              <UserRow key={user.id} user={user} />
-            ))}
-          </TableBody>
-        </Table>
-      </form>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="max-w-[150px]">Name</TableHead>
+            <TableHead className="hidden md:table-cell">Email</TableHead>
+            <TableHead className="hidden md:table-cell">Username</TableHead>
+            <TableHead></TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {users.map((user) => (
+            <UserRow key={user.id} user={user} />
+          ))}
+        </TableBody>
+      </Table>
       {offset !== null && (
         <Button
           className="mt-4 w-40"
@@ -62,6 +62,7 @@ export function UsersTable({
 function UserRow({ user }: { user: SelectUser }) {
   const userId = user.id;
   const deleteUserWithId = deleteUser.bind(null, userId);
+  const [isPending, startTransition] = useTransition();
 
   return (
     <TableRow>
@@ -76,8 +77,9 @@ function UserRow({ user }: { user: SelectUser }) {
           className="w-full"
           size="sm"
           variant="outline"
-          formAction={deleteUserWithId}
+          onClick={() => startTransition(() => deleteUserWithId())}
         >
+          {isPending && <ButtonSpinner />}
           Delete
         </Button>
       </TableCell>
