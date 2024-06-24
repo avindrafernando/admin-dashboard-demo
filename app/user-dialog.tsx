@@ -14,7 +14,33 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SelectUser } from '@/lib/db';
 import { addUser, updateUser } from './actions';
-import { useState } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
+import { useFormStatus } from 'react-dom';
+import { ButtonSpinner } from '@/components/icons';
+
+function SubmitButton({
+  user,
+  setOpen
+}: {
+  user?: SelectUser;
+  setOpen: Dispatch<SetStateAction<boolean>>;
+}) {
+  const { pending } = useFormStatus();
+
+  return (
+    <Button
+      type="submit"
+      onClick={() => {
+        if (!pending) setOpen(false);
+      }}
+      formAction={user ? updateUser.bind(null, user) : addUser}
+      disabled={pending}
+    >
+      {pending && <ButtonSpinner />}
+      Save changes
+    </Button>
+  );
+}
 
 export function UserDialog({ user }: { user?: SelectUser }) {
   const [open, setOpen] = useState(false);
@@ -73,15 +99,7 @@ export function UserDialog({ user }: { user?: SelectUser }) {
             </div>
           </div>
           <DialogFooter>
-            <Button
-              type="submit"
-              onClick={() => {
-                setOpen(false);
-              }}
-              formAction={user ? updateUser.bind(null, user) : addUser}
-            >
-              Save changes
-            </Button>
+            <SubmitButton user={user} setOpen={setOpen} />
           </DialogFooter>
         </form>
       </DialogContent>
