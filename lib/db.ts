@@ -2,7 +2,7 @@ import 'server-only';
 
 import { neon } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
-import { pgTable, serial, varchar } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar } from 'drizzle-orm/pg-core';
 import { eq, ilike } from 'drizzle-orm';
 
 export const db = drizzle(
@@ -14,13 +14,14 @@ export const db = drizzle(
 );
 
 const users = pgTable('users', {
-  id: serial('id').primaryKey(),
+  id: uuid('id').primaryKey().defaultRandom(),
   name: varchar('name', { length: 50 }),
   username: varchar('username', { length: 50 }),
   email: varchar('email', { length: 50 })
 });
 
 export type SelectUser = typeof users.$inferSelect;
+export type SelectUserWithoutId = Omit<SelectUser, 'id'>;
 
 export async function getUsers(
   search: string,
@@ -50,6 +51,17 @@ export async function getUsers(
   return { users: moreUsers, newOffset };
 }
 
-export async function deleteUserById(id: number) {
+export async function deleteUserById(id: string) {
   await db.delete(users).where(eq(users.id, id));
+}
+
+export async function updateUserById(user: SelectUser) {
+  await db
+    .update(users)
+    .set({ name: user.name, email: user.email, username: user.username })
+    .where(eq(users.id, user.id));
+}
+
+export async function createUser(user: SelectUserWithoutId) {
+  await db.insert(users).values(user);
 }
