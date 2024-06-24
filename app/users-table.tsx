@@ -15,6 +15,8 @@ import { useRouter } from 'next/navigation';
 import { UserDialog } from './user-dialog';
 import { useTransition } from 'react';
 import { ButtonSpinner } from '@/components/icons';
+import { ErrorBoundary } from 'react-error-boundary';
+import { ErrorContainer } from './error';
 
 export function UsersTable({
   users,
@@ -65,24 +67,26 @@ function UserRow({ user }: { user: SelectUser }) {
   const [isPending, startTransition] = useTransition();
 
   return (
-    <TableRow>
-      <TableCell className="font-medium">{user.name}</TableCell>
-      <TableCell className="hidden md:table-cell">{user.email}</TableCell>
-      <TableCell>{user.username}</TableCell>
-      <TableCell>
-        <UserDialog user={user} />
-      </TableCell>
-      <TableCell>
-        <Button
-          className="w-full"
-          size="sm"
-          variant="outline"
-          onClick={() => startTransition(() => deleteUserWithId())}
-        >
-          {isPending && <ButtonSpinner />}
-          Delete
-        </Button>
-      </TableCell>
-    </TableRow>
+    <ErrorBoundary fallback={<ErrorContainer />}>
+      <TableRow>
+        <TableCell className="font-medium">{user.name}</TableCell>
+        <TableCell className="hidden md:table-cell">{user.email}</TableCell>
+        <TableCell>{user.username}</TableCell>
+        <TableCell>
+          <UserDialog user={user} />
+        </TableCell>
+        <TableCell>
+          <Button
+            className="w-full"
+            size="sm"
+            variant="outline"
+            onClick={() => startTransition(() => deleteUserWithId())}
+          >
+            {isPending && <ButtonSpinner />}
+            Delete
+          </Button>
+        </TableCell>
+      </TableRow>
+    </ErrorBoundary>
   );
 }
