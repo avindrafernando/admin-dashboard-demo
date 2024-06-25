@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SelectUser } from '@/lib/db';
 import { addUser, FormState, updateUser } from './actions';
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { useFormState, useFormStatus } from 'react-dom';
 import { ButtonSpinner } from '@/components/icons';
 
@@ -29,23 +29,13 @@ function SubmitButton({
 }) {
   const { pending } = useFormStatus();
 
-  // HACK to reset state after successful submission
-  useEffect(() => {
-    if (!pending && state.status === 'success') {
-      state.status = 'idle';
-      state.message = '';
-
-      setOpen(false);
-    }
-  }, [state, setOpen]);
-
   return (
     <Button
       type="submit"
       formAction={formAction}
-      // onClick={() => {
-      //   if (!pending) setOpen(false);
-      // }}
+      onClick={() => {
+        if (!pending && state.status === 'success') setOpen(false);
+      }}
       disabled={pending}
     >
       {pending && <ButtonSpinner />}
@@ -60,11 +50,21 @@ const initialState: FormState = {
 };
 
 export function UserDialog({ user }: { user?: SelectUser }) {
+  const formRef = useRef<HTMLFormElement>(null);
   const [open, setOpen] = useState(false);
   const [state, formAction] = useFormState(
     user ? updateUser.bind(null, user) : addUser,
     initialState
   );
+
+  if (state?.status === 'success') {
+    formRef?.current?.reset();
+
+    // HACK to reset state after successful submission
+    state.status = 'idle';
+    state.message = '';
+    state.errors = undefined;
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -80,7 +80,7 @@ export function UserDialog({ user }: { user?: SelectUser }) {
             Make changes to the user here. Click save when you're done.
           </DialogDescription>
         </DialogHeader>
-        <form>
+        <form ref={formRef}>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="name" className="text-right">
