@@ -25,7 +25,7 @@ const initialState: FormState = {
 export function UserDialog({ user }: { user?: SelectUser }) {
   const [open, setOpen] = useState(false);
   const [state, formAction, isPending] = useActionState(
-    user ? updateUser.bind(null, user) : addUser,
+    user ? updateUser.bind(null, user.id) : addUser,
     initialState
   );
   const [wasPending, setWasPending] = useState(isPending);
