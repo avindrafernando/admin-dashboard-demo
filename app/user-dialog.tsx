@@ -14,45 +14,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SelectUser } from '@/lib/db';
 import { addUser, FormState, updateUser } from './actions';
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState, useState } from 'react';
 import { ButtonSpinner } from '@/components/icons';
-
-function SubmitButton({
-  formAction,
-  setOpen,
-  state
-}: {
-  formAction: (formData: FormData) => void;
-  setOpen: Dispatch<SetStateAction<boolean>>;
-  state: FormState;
-}) {
-  const { pending } = useFormStatus();
-
-  // HACK to reset state after successful submission
-  useEffect(() => {
-    if (!pending && state.status === 'success') {
-      state.status = 'idle';
-      state.message = '';
-
-      setOpen(false);
-    }
-  }, [state, setOpen]);
-
-  return (
-    <Button
-      type="submit"
-      formAction={formAction}
-      // onClick={() => {
-      //   if (!pending) setOpen(false);
-      // }}
-      disabled={pending}
-    >
-      {pending && <ButtonSpinner />}
-      Save changes
-    </Button>
-  );
-}
 
 const initialState: FormState = {
   message: '',
@@ -61,10 +24,19 @@ const initialState: FormState = {
 
 export function UserDialog({ user }: { user?: SelectUser }) {
   const [open, setOpen] = useState(false);
-  const [state, formAction] = useFormState(
+  const [state, formAction, isPending] = useActionState(
     user ? updateUser.bind(null, user) : addUser,
     initialState
   );
+  const [wasPending, setWasPending] = useState(isPending);
+
+  if (wasPending !== isPending) {
+    setWasPending(isPending);
+  }
+
+  if (wasPending && !isPending && state.status === 'success' && open) {
+    setOpen(false);
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -100,7 +72,8 @@ export function UserDialog({ user }: { user?: SelectUser }) {
               <Input
                 id="email"
                 name="email"
-                //   type="email"
+                // type="email" would block invalid values in the browser
+                // before Zod can run the server-side email check.
                 className="col-span-3"
                 defaultValue={user?.email ?? ''}
                 required
@@ -137,11 +110,10 @@ export function UserDialog({ user }: { user?: SelectUser }) {
             )}
           </div>
           <DialogFooter>
-            <SubmitButton
-              formAction={formAction}
-              setOpen={setOpen}
-              state={state}
-            />
+            <Button type="submit" formAction={formAction} disabled={isPending}>
+              {isPending && <ButtonSpinner />}
+              Save changes
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
