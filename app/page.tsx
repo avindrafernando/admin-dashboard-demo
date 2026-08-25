@@ -3,11 +3,12 @@ import { UsersTable } from './users-table';
 import { Search } from './search';
 import { UserDialog } from './user-dialog';
 
-export default async function IndexPage({
-  searchParams
-}: {
-  searchParams: { q: string; offset: string };
-}) {
+export default async function IndexPage(
+  props: {
+    searchParams: Promise<{ q: string; offset: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const search = searchParams.q ?? '';
   const offset = searchParams.offset ?? 0;
   const { users, newOffset } = await getUsers(search, Number(offset));
