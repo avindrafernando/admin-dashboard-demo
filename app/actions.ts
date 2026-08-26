@@ -1,7 +1,7 @@
 'use server';
 
 import { createUser, deleteUserById, updateUserById } from '@/lib/db';
-import { requireSession } from '@/lib/auth';
+import { getSession, sessionCanWrite } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 
@@ -17,10 +17,19 @@ export type FormState = {
   errors?: FieldError;
 };
 
-const signedOutState: FormState = {
-  status: 'error',
-  message: 'You must be signed in to do that'
-};
+function signedOutState(): FormState {
+  return {
+    status: 'error',
+    message: 'You must be signed in to do that'
+  };
+}
+
+function unauthorizedState(): FormState {
+  return {
+    status: 'error',
+    message: 'You are not allowed to do that'
+  };
+}
 
 const userSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -30,8 +39,28 @@ const userSchema = z.object({
 
 const userIdSchema = z.string().uuid();
 
+async function authorizeWrite(): Promise<FormState | null> {
+  const session = await getSession();
+  if (!session) {
+    return signedOutState();
+  }
+
+  if (!sessionCanWrite(session)) {
+    return unauthorizedState();
+  }
+
+  return null;
+}
+
 export async function deleteUser(userId: string) {
-  await requireSession();
+  const session = await getSession();
+  if (!session) {
+    throw new Error('You must be signed in to do that');
+  }
+
+  if (!sessionCanWrite(session)) {
+    throw new Error('You are not allowed to do that');
+  }
 
   const parsedId = userIdSchema.safeParse(userId);
   if (!parsedId.success) {
@@ -52,15 +81,17 @@ export async function updateUser(
   previousState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  try {
-    await requireSession();
-  } catch {
-    return signedOutState;
+  const denied = await authorizeWrite();
+  if (denied) {
+    return denied;
   }
 
   const parsedId = userIdSchema.safeParse(userId);
   if (!parsedId.success) {
-    throw new Error('Failed to update user', { cause: parsedId.error });
+    return {
+      status: 'error',
+      message: 'Invalid user'
+    };
   }
 
   const validatedFields = userSchema.safeParse({
@@ -98,10 +129,9 @@ export async function addUser(
   prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  try {
-    await requireSession();
-  } catch {
-    return signedOutState;
+  const denied = await authorizeWrite();
+  if (denied) {
+    return denied;
   }
 
   const validatedFields = userSchema.safeParse({
