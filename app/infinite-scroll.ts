@@ -1,15 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 export function useInfiniteScroll(onIntersect: () => void) {
   const sentinelRef = useRef<HTMLElement | null>(null);
-  const [observer, setObserver] = useState<IntersectionObserver | null>(null);
 
   useEffect(() => {
-    if (observer) {
-      observer.disconnect();
-    }
-
-    const obs = new IntersectionObserver(
+    const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           onIntersect();
@@ -20,13 +15,11 @@ export function useInfiniteScroll(onIntersect: () => void) {
       }
     );
 
-    setObserver(obs);
-
     if (sentinelRef.current) {
-      obs.observe(sentinelRef.current);
+      observer.observe(sentinelRef.current);
     }
 
-    return () => obs.disconnect();
+    return () => observer.disconnect();
   }, [onIntersect]);
 
   return sentinelRef;

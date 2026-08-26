@@ -1,5 +1,5 @@
 import { getUsers } from '@/lib/db';
-import { auth } from '@/lib/auth';
+import { getSession, sessionCanWrite } from '@/lib/auth';
 import { UsersTable } from './users-table';
 import { Search } from './search';
 import { UserDialog } from './user-dialog';
@@ -12,9 +12,9 @@ export default async function IndexPage(props: {
   const offset = searchParams.offset ?? 0;
   const [{ users, newOffset }, session] = await Promise.all([
     getUsers(search, Number(offset)),
-    auth()
+    getSession()
   ]);
-  const canWrite = Boolean(session?.user);
+  const canWrite = sessionCanWrite(session);
 
   return (
     <main className="flex flex-1 flex-col p-6 md:p-8">

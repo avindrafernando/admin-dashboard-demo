@@ -1,5 +1,6 @@
 import NextAuth from 'next-auth';
 import GitHub from 'next-auth/providers/github';
+import type { Session } from 'next-auth';
 
 function githubAllowlist(): string[] {
   return (process.env.AUTH_GITHUB_ALLOWLIST ?? '')
@@ -17,6 +18,11 @@ function githubLogin(profile: unknown): string | null {
   return typeof login === 'string' ? login.toLowerCase() : null;
 }
 
+function sessionGithubLogin(session: Session | null): string | null {
+  const login = session?.user?.login;
+  return typeof login === 'string' ? login.toLowerCase() : null;
+}
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [GitHub],
   trustHost: true,
@@ -25,26 +31,40 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   callbacks: {
     async signIn({ profile }) {
-      const allowed = githubAllowlist();
-      if (allowed.length === 0) {
-        return false;
-      }
-
       const login = githubLogin(profile);
       if (!login) {
         return false;
       }
 
-      return allowed.includes(login);
+      return githubAllowlist().includes(login);
+    },
+    async jwt({ token, profile }) {
+      const login = githubLogin(profile);
+      if (login) {
+        token.login = login;
+      }
+
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user && typeof token.login === 'string') {
+        session.user.login = token.login;
+      }
+
+      return session;
     }
   }
 });
 
-export async function requireSession() {
-  const session = await auth();
-  if (!session?.user) {
-    throw new Error('You must be signed in to do that');
+export async function getSession(): Promise<Session | null> {
+  return (await auth()) ?? null;
+}
+
+export function sessionCanWrite(session: Session | null): boolean {
+  const login = sessionGithubLogin(session);
+  if (!login) {
+    return false;
   }
 
-  return session;
+  return githubAllowlist().includes(login);
 }
