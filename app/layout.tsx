@@ -56,21 +56,25 @@ export default function RootLayout({
               </div>
             </div>
             <div className="flex flex-col">
-              <header className="flex h-14 items-center justify-between gap-4 border-b bg-card/80 px-4 backdrop-blur-sm sm:px-6">
-                <div className="flex min-w-0 items-center gap-3 lg:hidden">
+              <header className="flex h-14 items-center justify-between gap-2 border-b bg-card/80 px-3 backdrop-blur-sm sm:gap-4 sm:px-6">
+                <div className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto lg:hidden">
                   <Link
-                    className="flex items-center gap-2.5 text-sm font-semibold tracking-tight"
+                    className="flex shrink-0 items-center gap-2.5 text-sm font-semibold tracking-tight"
                     href="/"
                   >
                     <Logo />
-                    <span>ACME</span>
+                    <span className="sr-only sm:not-sr-only">ACME</span>
                   </Link>
-                  <nav className="flex items-center gap-1">
-                    <NavItem href="/">Users</NavItem>
-                    <NavItem href="/settings">Settings</NavItem>
+                  <nav aria-label="Main" className="flex shrink-0 items-center">
+                    <NavItem href="/" className="px-2 py-1.5">
+                      Users
+                    </NavItem>
+                    <NavItem href="/settings" className="px-2 py-1.5">
+                      Settings
+                    </NavItem>
                   </nav>
                 </div>
-                <div className="ml-auto flex items-center gap-2">
+                <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
                   <ThemeToggle />
                   <User />
                 </div>
