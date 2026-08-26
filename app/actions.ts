@@ -32,12 +32,12 @@ function unauthorizedState(): FormState {
 }
 
 const userSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Please enter a valid email address'),
-  username: z.string().min(3, 'Username must be at least 3 characters')
+  name: z.string().min(2, { error: 'Name must be at least 2 characters' }),
+  email: z.email({ error: 'Please enter a valid email address' }),
+  username: z.string().min(3, { error: 'Username must be at least 3 characters' })
 });
 
-const userIdSchema = z.string().uuid();
+const userIdSchema = z.uuid();
 
 async function authorizeWrite(): Promise<FormState | null> {
   const session = await getSession();
@@ -104,7 +104,7 @@ export async function updateUser(
     return {
       status: 'error',
       message: 'Validation failed',
-      errors: validatedFields.error.flatten().fieldErrors
+      errors: z.flattenError(validatedFields.error).fieldErrors
     };
   }
 
@@ -144,7 +144,7 @@ export async function addUser(
     return {
       status: 'error',
       message: 'Validation failed',
-      errors: validatedFields.error.flatten().fieldErrors
+      errors: z.flattenError(validatedFields.error).fieldErrors
     };
   }
 

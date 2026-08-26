@@ -19,7 +19,7 @@ This is a starter template using the following stack:
 - Language - [TypeScript](https://www.typescriptlang.org)
 - Auth - [Auth.js / NextAuth](https://authjs.dev) with GitHub
 - Database - [Postgres](https://vercel.com/postgres) via [Drizzle ORM](https://orm.drizzle.team) and [Neon](https://neon.tech)
-- Validation - [Zod 3](https://zod.dev)
+- Validation - [Zod 4](https://zod.dev)
 - Deployment - [Vercel](https://vercel.com/docs/concepts/next.js/overview)
 - Styling - [Tailwind CSS](https://tailwindcss.com)
 - Components - [Shadcn UI](https://ui.shadcn.com/)
