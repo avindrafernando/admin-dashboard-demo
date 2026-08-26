@@ -38,64 +38,55 @@ export function UserDialog({ user }: { user?: SelectUser }) {
     setOpen(false);
   }
 
+  const showErrors = state?.status === 'error';
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="w-full" size="sm" variant="outline">
-          {user ? 'Edit' : 'Add'}
+        <Button className={user ? 'w-full' : 'w-full sm:w-auto'} variant={user ? 'outline' : 'default'}>
+          {user ? 'Edit' : 'Add user'}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{user ? 'Edit' : 'Add'} User</DialogTitle>
+          <DialogTitle>{user ? 'Edit' : 'Add'} user</DialogTitle>
           <DialogDescription>
-            Make changes to the user here. Click save when you're done.
+            Make changes to the user here. Click save when you are done.
           </DialogDescription>
         </DialogHeader>
         <form>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">
-                Name
-              </Label>
+          <div className="grid gap-4 py-2">
+            <div className="grid gap-2">
+              <Label htmlFor="name">Name</Label>
               <Input
                 id="name"
                 name="name"
-                className="col-span-3"
                 defaultValue={user?.name ?? ''}
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="email" className="text-right">
-                Email
-              </Label>
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 name="email"
                 // type="email" would block invalid values in the browser
                 // before Zod can run the server-side email check.
-                className="col-span-3"
                 defaultValue={user?.email ?? ''}
-                required
               />
             </div>
-
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="username" className="text-right">
-                Username
-              </Label>
+            <div className="grid gap-2">
+              <Label htmlFor="username">Username</Label>
               <Input
                 id="username"
                 name="username"
-                className="col-span-3"
                 defaultValue={user?.username ?? ''}
               />
             </div>
-            {state && state.status === 'error' && state.errors && (
+            {showErrors && (
               <div
-                id="email-error"
+                id="form-error"
                 aria-live="polite"
-                className="text-sm text-red-500 text-right grid items-center"
+                className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive"
               >
                 {state.errors?.name?.map((error: string) => (
                   <p key={error}>{error}</p>
@@ -106,13 +97,14 @@ export function UserDialog({ user }: { user?: SelectUser }) {
                 {state.errors?.username?.map((error: string) => (
                   <p key={error}>{error}</p>
                 ))}
+                {!state.errors && state.message ? <p>{state.message}</p> : null}
               </div>
             )}
           </div>
           <DialogFooter>
             <Button type="submit" formAction={formAction} disabled={isPending}>
               {isPending && <ButtonSpinner />}
-              Save changes
+              {isPending ? 'Saving' : 'Save changes'}
             </Button>
           </DialogFooter>
         </form>

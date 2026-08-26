@@ -64,7 +64,7 @@ export function Spinner() {
   return (
     <div className="absolute right-0 top-0 bottom-0 flex items-center justify-center">
       <svg
-        className="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-700"
+        className="mr-3 h-4 w-4 animate-spin text-muted-foreground"
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
         viewBox="0 0 24 24"
@@ -91,7 +91,7 @@ export function ButtonSpinner() {
   return (
     <div className="flex items-center justify-center">
       <svg
-        className="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-700"
+        className="h-4 w-4 animate-spin text-current"
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
         viewBox="0 0 24 24"
@@ -117,11 +117,11 @@ export function ButtonSpinner() {
 export function Logo() {
   return (
     <svg
-      width="32"
-      height="32"
+      width="24"
+      height="24"
       viewBox="0 0 32 32"
       fill="none"
-      className="text-gray-100"
+      className="text-foreground"
       xmlns="http://www.w3.org/2000/svg"
     >
       <rect width="100%" height="100%" rx="16" fill="currentColor" />
@@ -129,7 +129,7 @@ export function Logo() {
         fillRule="evenodd"
         clipRule="evenodd"
         d="M17.6482 10.1305L15.8785 7.02583L7.02979 22.5499H10.5278L17.6482 10.1305ZM19.8798 14.0457L18.11 17.1983L19.394 19.4511H16.8453L15.1056 22.5499H24.7272L19.8798 14.0457Z"
-        fill="black"
+        className="fill-background"
       />
     </svg>
   );

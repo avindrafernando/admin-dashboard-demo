@@ -1,6 +1,7 @@
 'use server';
 
 import { createUser, deleteUserById, updateUserById } from '@/lib/db';
+import { requireSession } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 
@@ -16,6 +17,11 @@ export type FormState = {
   errors?: FieldError;
 };
 
+const signedOutState: FormState = {
+  status: 'error',
+  message: 'You must be signed in to do that'
+};
+
 const userSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Please enter a valid email address'),
@@ -25,6 +31,8 @@ const userSchema = z.object({
 const userIdSchema = z.string().uuid();
 
 export async function deleteUser(userId: string) {
+  await requireSession();
+
   const parsedId = userIdSchema.safeParse(userId);
   if (!parsedId.success) {
     throw new Error('Failed to delete user', { cause: parsedId.error });
@@ -44,6 +52,12 @@ export async function updateUser(
   previousState: FormState,
   formData: FormData
 ): Promise<FormState> {
+  try {
+    await requireSession();
+  } catch {
+    return signedOutState;
+  }
+
   const parsedId = userIdSchema.safeParse(userId);
   if (!parsedId.success) {
     throw new Error('Failed to update user', { cause: parsedId.error });
@@ -84,6 +98,12 @@ export async function addUser(
   prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
+  try {
+    await requireSession();
+  } catch {
+    return signedOutState;
+  }
+
   const validatedFields = userSchema.safeParse({
     name: formData.get('name'),
     email: formData.get('email'),

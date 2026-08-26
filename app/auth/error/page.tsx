@@ -18,9 +18,9 @@ export default async function AuthErrorPage({
   const message = messages[error ?? ''] ?? messages.Default;
 
   return (
-    <main className="flex flex-1 flex-col items-start gap-4 p-4 md:p-6">
-      <h1 className="font-semibold text-lg md:text-2xl">Sign in blocked</h1>
-      <p className="max-w-xl text-base">{message}</p>
+    <main className="flex flex-1 flex-col items-start gap-3 p-6 md:p-8">
+      <h1 className="text-2xl font-semibold tracking-tight">Sign in blocked</h1>
+      <p className="max-w-xl text-sm text-muted-foreground">{message}</p>
       <Button asChild variant="outline">
         <Link href="/">Back to users</Link>
       </Button>

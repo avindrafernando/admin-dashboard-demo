@@ -1,10 +1,18 @@
 import './globals.css';
 
 import Link from 'next/link';
+import { Plus_Jakarta_Sans } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/react';
 import { Logo, SettingsIcon, UsersIcon } from '@/components/icons';
+import { ThemeProvider } from '@/components/theme-provider';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { User } from './user';
 import { NavItem } from './nav-item';
+
+const sans = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  variable: '--font-sans'
+});
 
 export const metadata = {
   title: 'Next.js App Router + NextAuth + Tailwind CSS',
@@ -18,49 +26,54 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="h-full bg-gray-50">
-      <body>
-        <div className="grid min-h-screen w-full lg:grid-cols-[280px_1fr]">
-          <div className="hidden border-r bg-gray-100/40 lg:block dark:bg-gray-800/40">
-            <div className="flex h-full max-h-screen flex-col gap-2">
-              <div className="flex h-[60px] items-center border-b px-5">
+    <html lang="en" className={`${sans.variable} h-full`} suppressHydrationWarning>
+      <body className="min-h-full font-sans">
+        <ThemeProvider>
+          <div className="grid min-h-screen w-full lg:grid-cols-[240px_1fr]">
+            <div className="hidden border-r bg-card lg:block">
+              <div className="flex h-full max-h-screen flex-col">
+                <div className="flex h-14 items-center px-5">
+                  <Link
+                    className="flex items-center gap-2.5 text-sm font-semibold tracking-tight"
+                    href="/"
+                  >
+                    <Logo />
+                    <span>ACME</span>
+                  </Link>
+                </div>
+                <div className="flex-1 overflow-auto px-3 py-2">
+                  <nav className="grid gap-1">
+                    <NavItem href="/">
+                      <UsersIcon className="h-4 w-4" />
+                      Users
+                    </NavItem>
+                    <NavItem href="/settings">
+                      <SettingsIcon className="h-4 w-4" />
+                      Settings
+                    </NavItem>
+                  </nav>
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-col">
+              <header className="flex h-14 items-center justify-between gap-4 border-b bg-card/80 px-4 backdrop-blur-sm sm:px-6">
                 <Link
-                  className="flex items-center gap-2 font-semibold"
+                  className="flex items-center gap-2.5 text-sm font-semibold tracking-tight lg:hidden"
                   href="/"
                 >
                   <Logo />
-                  <span className="">Lorem Picsum Corp</span>
+                  <span>ACME</span>
                 </Link>
-              </div>
-              <div className="flex-1 overflow-auto py-2">
-                <nav className="grid items-start px-4 text-sm font-medium">
-                  <NavItem href="/">
-                    <UsersIcon className="h-4 w-4" />
-                    Users
-                  </NavItem>
-                  <NavItem href="/settings">
-                    <SettingsIcon className="h-4 w-4" />
-                    Settings
-                  </NavItem>
-                </nav>
-              </div>
+                <div className="ml-auto flex items-center gap-2">
+                  <ThemeToggle />
+                  <User />
+                </div>
+              </header>
+              {children}
             </div>
           </div>
-          <div className="flex flex-col">
-            <header className="flex h-14 lg:h-[60px] items-center gap-4 border-b bg-gray-100/40 px-6 dark:bg-gray-800/40 justify-between lg:justify-end">
-              <Link
-                className="flex items-center gap-2 font-semibold lg:hidden"
-                href="/"
-              >
-                <Logo />
-                <span className="">ACME</span>
-              </Link>
-              <User />
-            </header>
-            {children}
-          </div>
-        </div>
-        <Analytics />
+          <Analytics />
+        </ThemeProvider>
       </body>
     </html>
   );
