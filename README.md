@@ -51,6 +51,10 @@ INSERT INTO users (email, name, username) VALUES ('me@site.com', 'Me', 'username
 
 Copy the `.env.example` file to `.env` and update the values.
 
+`AUTH_GITHUB_ALLOWLIST` is a comma-separated list of GitHub logins that may sign in. Anyone else who completes GitHub OAuth is rejected with an access-denied page. Leave it empty to reject every sign-in. Do not commit real logins.
+
+`AUTH_TRUST_HOST=true` tells Auth.js to trust the request host. Localhost and Vercel both need this after the Auth.js v5 upgrade, or `/api/auth/session` fails with UntrustedHost.
+
 Finally, run the following commands to start the development server:
 
 ```

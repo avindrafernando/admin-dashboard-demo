@@ -1,12 +1,7 @@
 'use server';
 
-import {
-  deleteUserById,
-  SelectUser,
-  updateUserById,
-  createUser,
-  SelectUserWithoutId
-} from '@/lib/db';
+import { createUser, deleteUserById, updateUserById } from '@/lib/db';
+import { requireSession } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 
@@ -22,27 +17,52 @@ export type FormState = {
   errors?: FieldError;
 };
 
+const signedOutState: FormState = {
+  status: 'error',
+  message: 'You must be signed in to do that'
+};
+
 const userSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Please enter a valid email address'),
   username: z.string().min(3, 'Username must be at least 3 characters')
 });
 
+const userIdSchema = z.string().uuid();
+
 export async function deleteUser(userId: string) {
+  await requireSession();
+
+  const parsedId = userIdSchema.safeParse(userId);
+  if (!parsedId.success) {
+    throw new Error('Failed to delete user', { cause: parsedId.error });
+  }
+
   try {
-    await deleteUserById(userId);
+    await deleteUserById(parsedId.data);
   } catch (e) {
-    throw new Error('Failed to delete user');
+    throw new Error('Failed to delete user', { cause: e });
   }
 
   revalidatePath('/');
 }
 
 export async function updateUser(
-  user: SelectUser,
+  userId: string,
   previousState: FormState,
   formData: FormData
 ): Promise<FormState> {
+  try {
+    await requireSession();
+  } catch {
+    return signedOutState;
+  }
+
+  const parsedId = userIdSchema.safeParse(userId);
+  if (!parsedId.success) {
+    throw new Error('Failed to update user', { cause: parsedId.error });
+  }
+
   const validatedFields = userSchema.safeParse({
     name: formData.get('name'),
     email: formData.get('email'),
@@ -57,17 +77,13 @@ export async function updateUser(
     };
   }
 
-  const updatedUser: SelectUser = {
-    id: user.id,
-    name: String(formData.get('name')) ?? user.name,
-    email: String(formData.get('email')) ?? user.email,
-    username: String(formData.get('username')) ?? user.username
-  };
-
   try {
-    await updateUserById(updatedUser);
+    await updateUserById({
+      id: parsedId.data,
+      ...validatedFields.data
+    });
   } catch (e) {
-    throw new Error('Failed to update user');
+    throw new Error('Failed to update user', { cause: e });
   }
 
   revalidatePath('/');
@@ -82,6 +98,12 @@ export async function addUser(
   prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
+  try {
+    await requireSession();
+  } catch {
+    return signedOutState;
+  }
+
   const validatedFields = userSchema.safeParse({
     name: formData.get('name'),
     email: formData.get('email'),
@@ -96,16 +118,10 @@ export async function addUser(
     };
   }
 
-  const newUser: SelectUserWithoutId = {
-    name: String(formData.get('name')) ?? '',
-    email: String(formData.get('email')) ?? '',
-    username: String(formData.get('username')) ?? ''
-  };
-
   try {
-    await createUser(newUser);
+    await createUser(validatedFields.data);
   } catch (e) {
-    throw new Error('Failed to add user');
+    throw new Error('Failed to add user', { cause: e });
   }
 
   revalidatePath('/');

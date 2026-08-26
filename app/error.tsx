@@ -21,10 +21,12 @@ export default function Error({
 export const ErrorContainer = ({ reset }: { reset?: () => void }) => (
   <main className="p-4 md:p-6">
     <div>
-      <h2 className="text-red-600">Something went wrong!</h2>
+      <h2 className="text-lg font-semibold text-destructive">
+        Something went wrong!
+      </h2>
       {reset && (
         <Button
-          className="w-full border-red-600 text-red-600 mt-4"
+          className="mt-4"
           size="sm"
           variant="outline"
           onClick={() => reset()}
